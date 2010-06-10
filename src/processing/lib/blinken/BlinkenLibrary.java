@@ -169,17 +169,23 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * to last frame
 	 */
 	public void jump(int where) {
-		if (frames.length > where) {
-			currentFrame = where;
-
-			// update the pixel-array			
-			loadPixels();
-			System.arraycopy(frames[currentFrame].pixels, 0, pixels, 0, width*height);
-			updatePixels();
-
-			// set the jump time
-			lastJumpTime = parent.millis();
+		if (where < 0) {
+			where = 0;
 		}
+		
+		if (where > frames.length) {
+			where = frames.length;
+		}
+
+		currentFrame = where;
+
+		// update the pixel-array			
+		loadPixels();
+		System.arraycopy(frames[currentFrame].pixels, 0, pixels, 0, width*height);
+		updatePixels();
+
+		// set the jump time
+		lastJumpTime = parent.millis();
 	} 
 
 	/**
