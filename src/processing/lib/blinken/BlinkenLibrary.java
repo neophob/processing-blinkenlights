@@ -85,16 +85,16 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	/**
 	 * a Constructor, usually called in the setup() method in your sketch to
 	 * initialize and start the library.
-	 * @param theParent your papplet
+	 * @param parent your papplet
 	 * @param filename - the .blm file to load
 	 * @param r colorize the movie
 	 * @param g colorize the movie
 	 * @param b colorize the movie
 	 */
-	public BlinkenLibrary(PApplet theParent, String filename, int r, int g, int b) {
+	public BlinkenLibrary(PApplet parent, String filename, int r, int g, int b) {
 		super(1, 1, RGB); 
 		
-		this.parent = theParent;
+		this.parent = parent;
 		System.out.println(NAME+" "+VERSION);
 
 		try {
@@ -167,6 +167,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	/**
 	 * Jump to a specific location (in frames). if the frame does not exist, go
 	 * to last frame
+	 * @param where the frame nr
 	 */
 	public void jump(int where) {
 		if (where < 0) {
@@ -207,7 +208,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 
 	/**
 	 * creates a PImage-array of gif frames in a GifDecoder object 
-	 * @return
+	 * @return 
 	 */
 	private PImage[] extractFrames(int color) {
 		int n = blm.getFrame().size();
@@ -239,7 +240,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		loop = true;
 	}
 	/**
-	 * Shut off the repeating loop.
+	 * Shut off the repeating loop (enabled by default).
 	 */
 	public void noLoop() {
 		loop = false;
@@ -258,7 +259,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		currentFrame = 0;
 	}
 	/**
-	 * 
+	 * total frame numbers of current movie
 	 * @return how many frames this movie contains
 	 */
 	public int getNrOfFrames() {
@@ -282,13 +283,13 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	}
 	/**
 	 * return current frame
-	 * @return
+	 * @return current frame nr
 	 */
 	public int getCurrentFrame() {
 		return currentFrame;
 	}
 	/**
-	 * 
+	 * is the internal (frame) delay used or an external?
 	 * @return true if processing framerate is used, else
 	 * the file's delay is used
 	 */
