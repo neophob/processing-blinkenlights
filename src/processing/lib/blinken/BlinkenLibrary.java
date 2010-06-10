@@ -259,20 +259,6 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	}
 	/**
 	 * 
-	 * @return height of the movie
-	 */
-	public int getHeight() {
-		return Integer.parseInt( blm.getHeight() );
-	}
-	/**
-	 * 
-	 * @return width of the movie
-	 */
-	public int getWidth() {
-		return Integer.parseInt( blm.getWidth() );
-	}
-	/**
-	 * 
 	 * @return how many frames this movie contains
 	 */
 	public int getNrOfFrames() {
