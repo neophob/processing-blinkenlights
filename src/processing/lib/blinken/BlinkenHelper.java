@@ -21,9 +21,9 @@ public class BlinkenHelper {
 	
 	/**
 	 * return a converted frame
-	 * @param frameNr
-	 * @param blm
-	 * @return
+	 * @param frameNr which frame to convert
+	 * @param blm to marshalled object, our source
+	 * @return an image out of the frame
 	 */
 	public static BufferedImage grabFrame(int frameNr, Blm blm, int color) throws NumberFormatException {
 		int frames = blm.getFrame().size();
@@ -87,7 +87,14 @@ public class BlinkenHelper {
 		return im;
 	}
 	
-	
+	/**
+	 * convert string data to int[]
+	 * @param data
+	 * @param r colorize the pixel
+	 * @param g colorize the pixel
+	 * @param b colorize the pixel
+	 * @return 
+	 */
 	private static int[] getDataFromOneCharRow(String data, float r, float g, float b) {
 		int[] ret = new int[data.length()];
 		int ri,gi,bi;
@@ -103,6 +110,11 @@ public class BlinkenHelper {
 		return ret;
 	}
 	
+	/**
+	 * convert string data to int[]
+	 * @param data
+	 * @return
+	 */
 	private static int[] getDataFromTwoCharRow(String data) {
 		int[] ret = new int[data.length()];
 		int ofs=0;

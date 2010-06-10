@@ -27,7 +27,6 @@ package processing.lib.blinken;
 
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -45,10 +44,7 @@ import processing.lib.blinken.jaxb.Header;
  * some code is ripped of the animated gif lib by extrapixel.ch 
  *
  */
-
 public class BlinkenLibrary extends PImage implements Runnable {
-
-
 	// myParent is a reference to the parent sketch
 	private PApplet parent;
 	// the marshalled .blm file
@@ -78,10 +74,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	/**
 	 * a Constructor, usually called in the setup() method in your sketch to
 	 * initialize and start the library.
-	 * @param theParent
+	 * @param theParent your papplet
 	 * @param filename - the .blm file to load
-	 * @param x - x size of the output window
-	 * @param y - y size of the output window
 	 * @throws JAXBException
 	 */
 	public BlinkenLibrary(PApplet theParent, String filename) {
@@ -89,12 +83,13 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	}
 	
 	/**
-	 * 
-	 * @param theParent
-	 * @param filename
-	 * @param r
-	 * @param g
-	 * @param b
+	 * a Constructor, usually called in the setup() method in your sketch to
+	 * initialize and start the library.
+	 * @param theParent your papplet
+	 * @param filename - the .blm file to load
+	 * @param r colorize the movie
+	 * @param g colorize the movie
+	 * @param b colorize the movie
 	 */
 	public BlinkenLibrary(PApplet theParent, String filename, int r, int g, int b) {
 		super(1, 1, RGB); 
@@ -247,27 +242,25 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * Pause the animation at its current frame.
 	 */
 	public void pause() {
-		// System.out.println("pause");
 		play = false;
 	}
 	/**
 	 * Stop the animation, and rewind.
 	 */
 	public void stop() {
-		//System.out.println("stop");
 		play = false;
 		currentFrame = 0;
 	}
 	/**
 	 * 
-	 * @return
+	 * @return height of the movie
 	 */
 	public int getHeight() {
 		return Integer.parseInt( blm.getHeight() );
 	}
 	/**
 	 * 
-	 * @return
+	 * @return width of the movie
 	 */
 	public int getWidth() {
 		return Integer.parseInt( blm.getWidth() );
@@ -320,7 +313,6 @@ public class BlinkenLibrary extends PImage implements Runnable {
 
 	/**
 	 * return the version of the library.
-	 * 
 	 * @return String
 	 */
 	public static String version() {
