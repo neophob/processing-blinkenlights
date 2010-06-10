@@ -1,4 +1,3 @@
-import processing.lib.blinken.jaxb.*;
 import processing.lib.blinken.*;
 
 BlinkenLibrary blink;
