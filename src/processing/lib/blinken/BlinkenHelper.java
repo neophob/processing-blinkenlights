@@ -72,14 +72,12 @@ public class BlinkenHelper {
 				}
 			} else {
 				//two char per color value
+				//TODO no rgb files exists yet - so this code is very experimental!
 				data = getDataFromTwoCharRow(s);
-//				if (data.length != width) {
-//					System.out.println("Ooops: looks like here is an error: "+width+"!="+data.length);
-//				}
 			}
 			
-
 			//TODO channels/RGB
+			
 			System.arraycopy(data, 0, dest, ofs, width);
 			ofs += width;			
 		}
