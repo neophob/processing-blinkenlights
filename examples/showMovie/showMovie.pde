@@ -9,8 +9,8 @@ void setup() {
   textFont(font); 
   //support for gzip'ed files
   blink = new BlinkenLibrary(this, "rings_0.bml.gz", 255, 155, 66);
-  x = blink.getWidth();
-  y = blink.getHeight();
+  x = blink.width;
+  y = blink.height;
   totFrames = blink.getNrOfFrames();
 //  blink.setIgnoreFileDelay(true);
   blink.loop();    
