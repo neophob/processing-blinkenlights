@@ -73,6 +73,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	// last time the frame changed
 	private int lastJumpTime;
 
+	private String filename;
+	
 	public final static String NAME = "blinkenlights";
 	public final static String VERSION = "v0.4";
 
@@ -100,6 +102,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public BlinkenLibrary(PApplet parent, String filename, int r, int g, int b) {
 		super(1, 1, RGB); 
 		
+		this.filename = filename;
 		this.parent = parent;
 		log.log(Level.INFO, "{0} {1}", new Object[] { NAME, VERSION });
 
@@ -139,6 +142,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		stop();
 		frames = null;
 		runner = null;
+		play = false;
+		loop = false;
 	}
 
 	/**
@@ -173,7 +178,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 				}
 			}
 		}
-		log.log(Level.INFO, "Thread stopped");
+		log.log(Level.INFO, "Thread {0} stopped", filename);
 	}
 
 	/**
