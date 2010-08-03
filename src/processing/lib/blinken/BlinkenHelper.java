@@ -3,6 +3,8 @@ package processing.lib.blinken;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import processing.lib.blinken.jaxb.Blm;
 import processing.lib.blinken.jaxb.Frame;
@@ -15,6 +17,8 @@ import processing.lib.blinken.jaxb.Row;
  */
 public class BlinkenHelper {
 
+	static Logger log = Logger.getLogger(BlinkenHelper.class.getName());
+	
 	private BlinkenHelper() {
 		//no instance allowed
 	}
@@ -36,7 +40,7 @@ public class BlinkenHelper {
 		int width = Integer.parseInt(blm.getWidth());
 		int height = Integer.parseInt(blm.getHeight());
 		int bits = Integer.parseInt(blm.getBits());
-		int channels = Integer.parseInt(blm.getChannels());
+		//int channels = Integer.parseInt(blm.getChannels());
 		
 		Frame f = blm.getFrame().get(frameNr);
 		List<Row> rows = f.getRow();
@@ -68,7 +72,9 @@ public class BlinkenHelper {
 				//one char per color value
 				data = getDataFromOneCharRow(s, rCol, gCol, bCol);
 				if (data.length != width) {
-					System.out.println("Ooops: looks like here is an error: "+width+"!="+data.length);
+					log.log(Level.WARNING,
+							"Ooops: looks like here is an error: {0}!={1}"
+							, new Object[] { width, data.length });
 				}
 			} else {
 				//two char per color value

@@ -27,6 +27,9 @@ package processing.lib.blinken;
 
 
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -45,6 +48,9 @@ import processing.lib.blinken.jaxb.Header;
  *
  */
 public class BlinkenLibrary extends PImage implements Runnable {
+	
+	static Logger log = Logger.getLogger(BlinkenLibrary.class.getName());
+
 	// myParent is a reference to the parent sketch
 	private PApplet parent;
 	// the marshalled .blm file
@@ -68,7 +74,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int lastJumpTime;
 
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.3";
+	public final static String VERSION = "v0.4";
 
 
 	/**
@@ -95,15 +101,19 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		super(1, 1, RGB); 
 		
 		this.parent = parent;
-		System.out.println(NAME+" "+VERSION);
+		log.log(Level.INFO, "{0} {1}", new Object[] { NAME, VERSION });
 
 		try {
 			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
-			Unmarshaller unmarshaller = context.createUnmarshaller(  );			
-			blm = (Blm) unmarshaller.unmarshal( this.parent.createInput(filename) );
-			//blm = (Blm) unmarshaller.unmarshal(new File(filename));
+			Unmarshaller unmarshaller = context.createUnmarshaller();
+			InputStream input = this.parent.createInput(filename);
+			blm = (Blm) unmarshaller.unmarshal(input);
+			input.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.log(Level.WARNING,
+					"Failed to load {0}, Error: {1}"
+					, new Object[] { filename, e });
 		}
 
 		// fill up the PImage and the delay arrays
@@ -127,6 +137,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	public void dispose() {
 		stop();
+		frames = null;
 		runner = null;
 	}
 
@@ -162,6 +173,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 				}
 			}
 		}
+		log.log(Level.INFO, "Thread stopped");
 	}
 
 	/**
@@ -212,7 +224,6 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	private PImage[] extractFrames(int color) {
 		int n = blm.getFrame().size();
-
 		PImage[] frames = new PImage[n];
 
 		for (int i = 0; i < n; i++) {
