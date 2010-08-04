@@ -74,6 +74,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int lastJumpTime;
 
 	private String filename;
+	private int color;
 	
 	public final static String NAME = "blinkenlights";
 	public final static String VERSION = "v0.4";
@@ -100,11 +101,30 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * @param b colorize the movie
 	 */
 	public BlinkenLibrary(PApplet parent, String filename, int r, int g, int b) {
-		super(1, 1, RGB); 
-		
-		this.filename = filename;
+		super(1, 1, RGB); 		
 		this.parent = parent;
 		log.log(Level.INFO, "{0} {1}", new Object[] { NAME, VERSION });
+
+		// fill up the PImage and the delay arrays
+		this.color = r<<16 | g<<8 | b;
+		
+		parent.registerDispose(this);	
+		
+		loadFile(filename);
+		// and now, make the magic happen
+		this.runner = new Thread(this);
+		this.runner.start(); 		
+	}
+	
+	/**
+	 * load a new file
+	 * @param filename
+	 */
+	public void loadFile(String filename) {
+		boolean oldPlay = play;
+		//stop thread
+		play=false;
+		this.filename = filename;
 
 		try {
 			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
@@ -118,21 +138,15 @@ public class BlinkenLibrary extends PImage implements Runnable {
 					"Failed to load {0}, Error: {1}"
 					, new Object[] { filename, e });
 		}
-
-		// fill up the PImage and the delay arrays
-		int color = r<<16 | g<<8 | b;
 		this.frames = extractFrames(color);
 		this.delays = extractDelays(); 		
-		
-		// re-init our PImage with the new size
 		super.init(frames[0].width, frames[0].height, RGB);
 		this.currentFrame=0;
+
 		this.jump(0);
 		this.loop = true;
-		parent.registerDispose(this);		
-		// and now, make the magic happen
-		this.runner = new Thread(this);
-		this.runner.start(); 		
+		this.play=oldPlay;
+		// re-init our PImage with the new size	
 	}
 
 	/**
@@ -140,7 +154,6 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	public void dispose() {
 		stop();
-		frames = null;
 		runner = null;
 		play = false;
 		loop = false;
@@ -166,19 +179,27 @@ public class BlinkenLibrary extends PImage implements Runnable {
 				if (ignoreFileDelay || (parent.millis() - lastJumpTime >= delays[currentFrame])) {
 					// we need to jump
 
-					if (currentFrame == frames.length - 1) {
-						// its the last frame
-						if (loop) {
-							jump(0); // loop is on, so rewind
-						} 
-					} else {
-						// go to the next frame
-						jump(currentFrame + 1);
-					}					
+					try {
+						if (currentFrame == frames.length - 1) {
+							// its the last frame
+							if (loop) {
+								jump(0); // loop is on, so rewind
+							} 
+						} else {
+							// go to the next frame
+							jump(currentFrame + 1);
+						}					
+
+					} catch (Exception e) {
+						//jump can fail if we load a new file!
+					}
 				}
 			}
 		}
 		log.log(Level.INFO, "Thread {0} stopped", filename);
+		frames = null;
+		delays = null;
+		System.gc();
 	}
 
 	/**
