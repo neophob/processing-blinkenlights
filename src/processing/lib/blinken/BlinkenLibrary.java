@@ -77,7 +77,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int color;
 	
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.4";
+	public final static String VERSION = "v0.41";
 
 
 	/**
@@ -108,9 +108,9 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		// fill up the PImage and the delay arrays
 		this.color = r<<16 | g<<8 | b;
 		
-		parent.registerDispose(this);	
+		this.parent.registerDispose(this);	
 		
-		loadFile(filename);
+		this.loadFile(filename);
 		// and now, make the magic happen
 		this.runner = new Thread(this);
 		this.runner.start(); 		
@@ -124,26 +124,33 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		boolean oldPlay = play;
 		//stop thread
 		play=false;
-		this.filename = filename;
 
 		try {
 			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
 			Unmarshaller unmarshaller = context.createUnmarshaller();
+			this.filename = filename;
 			InputStream input = this.parent.createInput(filename);
 			blm = (Blm) unmarshaller.unmarshal(input);
 			input.close();
+			
+			//load images
+			this.frames = extractFrames(color);
+			
+			//load delays
+			this.delays = extractDelays();
+			//reinit applet
+			super.init(frames[0].width, frames[0].height, RGB);
+			//Select frame 0
+			this.currentFrame=0;
+			this.jump(0);
+			log.log(Level.INFO,
+					"Loaded file {0}, contains {1} frames"
+					, new Object[] { filename, frames.length });
 		} catch (Exception e) {
-			//e.printStackTrace();
 			log.log(Level.WARNING,
 					"Failed to load {0}, Error: {1}"
 					, new Object[] { filename, e });
 		}
-		this.frames = extractFrames(color);
-		this.delays = extractDelays(); 		
-		super.init(frames[0].width, frames[0].height, RGB);
-		this.currentFrame=0;
-
-		this.jump(0);
 		this.loop = true;
 		this.play=oldPlay;
 		// re-init our PImage with the new size	
@@ -169,6 +176,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 					int delay = (int)(1000.0f/this.parent.frameRate);
 					Thread.sleep(delay);
 				} else {
+					//wait per default 5ms - check below if next frame should taken
 					Thread.sleep(5);	
 				}							
 			} catch (InterruptedException e) {
@@ -213,11 +221,11 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		}
 		
 		if (where > frames.length) {
-			where = frames.length;
+			//System.out.println("where > frames.length:"+where+" > "+frames.length);
+			return;
 		}
-
 		currentFrame = where;
-
+		
 		// update the pixel-array			
 		loadPixels();
 		System.arraycopy(frames[currentFrame].pixels, 0, pixels, 0, width*height);
