@@ -113,6 +113,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		this.loadFile(filename);
 		// and now, make the magic happen
 		this.runner = new Thread(this);
+		this.runner.setName("Blinkenlights BML Animator");
 		this.runner.start(); 		
 	}
 	
