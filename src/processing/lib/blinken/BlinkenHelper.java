@@ -69,18 +69,15 @@ public class BlinkenHelper {
 			if (bits>0 && bits<5) {
 				//one char per color value
 				data = getDataFromOneCharRow(s, rCol, gCol, bCol);
-				if (data.length != width) {
-					log.log(Level.WARNING,
-							"Ooops: looks like here is an error: {0}!={1}"
-							, new Object[] { width, data.length });
-				}
 			} else {
 				//two char per color value
-				//TODO no rgb files exists yet - so this code is very experimental!
 				data = getDataFromTwoCharRow(s);
 			}
-			
-			//TODO channels/RGB
+			if (data.length != width) {
+				log.log(Level.WARNING,
+						"Ooops: looks like here is an error: {0}!={1}"
+						, new Object[] { width, data.length });
+			}
 			
 			System.arraycopy(data, 0, img.pixels, ofs, width);
 			ofs += width;			
@@ -118,20 +115,16 @@ public class BlinkenHelper {
 	 * @return
 	 */
 	private static int[] getDataFromTwoCharRow(String data) {
-		int[] ret = new int[data.length()];
+		int[] ret = new int[data.length()/2];
+		char[] convertedData = data.toCharArray();
 		int ofs=0;
+		int dst=0;
+		int col;
 		String tmp="";
-		for (char c: data.toCharArray()) {
-			//first char
-			if (tmp.isEmpty()) {
-				tmp+=c;
-			} else {
-				//second char
-				tmp+=c;
-				int i=Integer.parseInt(c+"", 16);
-				ret[ofs++]=i;
-				tmp="";
-			}
+		for (int i=0; i<data.length()/2; i++) {
+			tmp=convertedData[ofs++]+""+convertedData[ofs++];
+			col=Integer.parseInt(tmp, 16);			
+			ret[dst++] = col<<16 | col<<8 | col;
 		}
 		return ret;
 	}
