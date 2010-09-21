@@ -1,11 +1,10 @@
 package processing.lib.blinken;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import processing.core.PImage;
 import processing.lib.blinken.jaxb.Blm;
 import processing.lib.blinken.jaxb.Frame;
 import processing.lib.blinken.jaxb.Row;
@@ -29,7 +28,7 @@ public class BlinkenHelper {
 	 * @param blm to marshalled object, our source
 	 * @return an image out of the frame
 	 */
-	public static BufferedImage grabFrame(int frameNr, Blm blm, int color) throws NumberFormatException {
+	public static PImage grabFrame(int frameNr, Blm blm, int color) throws NumberFormatException {
 		int frames = blm.getFrame().size();
 		
 		//some sanity checks
@@ -45,9 +44,8 @@ public class BlinkenHelper {
 		Frame f = blm.getFrame().get(frameNr);
 		List<Row> rows = f.getRow();
 		
-		//BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
-		BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		int[] dest = ((DataBufferInt) im.getRaster().getDataBuffer()).getData();
+		PImage img = new PImage(width, height, PImage.RGB);
+		img.loadPixels();
 		
 		/**
 		 * Structure of row data (http://blinkenlights.net/project/bml)
@@ -84,11 +82,11 @@ public class BlinkenHelper {
 			
 			//TODO channels/RGB
 			
-			System.arraycopy(data, 0, dest, ofs, width);
+			System.arraycopy(data, 0, img.pixels, ofs, width);
 			ofs += width;			
 		}
-		
-		return im;
+		img.updatePixels();
+		return img;
 	}
 	
 	/**
