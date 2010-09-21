@@ -18,7 +18,7 @@
  * 
  * @author		Michael Vogt
  * @modified	21.10.2010
- * @version		v0.42
+ * @version		v0.5
  */
 
 package processing.lib.blinken;
