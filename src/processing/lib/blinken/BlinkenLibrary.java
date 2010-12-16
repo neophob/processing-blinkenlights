@@ -76,7 +76,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int color;
 	
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.5";
+	public final static String VERSION = "v0.51";
 
 
 	/**
@@ -127,11 +127,13 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	public void loadFile(String filename) {
 		this.threadRunning = false;
-
+		InputStream input = null;
+		
 		try {
 			//wait until thread is stopped
 			if (this.runner != null) {
-				this.runner.join();				
+				this.runner.join();	
+				this.runner = null;
 			}
 			boolean oldPlay = play;
 			//stop thread
@@ -140,9 +142,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			this.filename = filename;
-			InputStream input = this.parent.createInput(filename);
+			input = this.parent.createInput(filename);
 			blm = (Blm) unmarshaller.unmarshal(input);
-			input.close();
 			
 			//load images
 			this.frames = extractFrames(color);
@@ -172,6 +173,17 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			log.log(Level.WARNING,
 					"Failed to load {0}, Error: {1}"
 					, new Object[] { filename, e });
+		} finally {
+			try {
+				if (input!=null) {
+					input.close();
+					input = null;
+				}
+			} catch (Exception e) {
+				log.log(Level.WARNING,
+						"Failed to close file {0}, Error: {1}"
+						, new Object[] { filename, e });
+			}
 		}
 	}
 
@@ -294,6 +306,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public void play() {
 		play = true;
 	}
+	
 	/**
 	 * Begin playing the animation, with repeat.
 	 */
@@ -301,18 +314,21 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		play = true;
 		loop = true;
 	}
+	
 	/**
 	 * Shut off the repeating loop (enabled by default).
 	 */
 	public void noLoop() {
 		loop = false;
 	}
+	
 	/**
 	 * Pause the animation at its current frame.
 	 */
 	public void pause() {
 		play = false;
 	}
+	
 	/**
 	 * Stop the animation, and rewind.
 	 */
@@ -320,6 +336,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		play = false;
 		currentFrame = 0;
 	}
+	
 	/**
 	 * total frame numbers of current movie
 	 * @return how many frames this movie contains
@@ -343,6 +360,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public Blm getRawObject() {
 		return blm;
 	}
+	
 	/**
 	 * return current frame
 	 * @return current frame nr
@@ -350,6 +368,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public int getCurrentFrame() {
 		return currentFrame;
 	}
+	
 	/**
 	 * is the internal (frame) delay used or an external?
 	 * @return true if processing framerate is used, else
@@ -358,6 +377,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public boolean isIgnoreFileDelay() {
 		return ignoreFileDelay;
 	}
+	
 	/**
 	 * ignore the source file delay time
 	 * @param ignoreFileDelay
