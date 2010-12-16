@@ -14,9 +14,9 @@ import processing.lib.blinken.jaxb.Row;
  * @author michael vogt / neophob.com (c) 2010
  *
  */
-public class BlinkenHelper {
+public final class BlinkenHelper {
 
-	static Logger log = Logger.getLogger(BlinkenHelper.class.getName());
+	private static Logger log = Logger.getLogger(BlinkenHelper.class.getName());
 	
 	private BlinkenHelper() {
 		//no instance allowed

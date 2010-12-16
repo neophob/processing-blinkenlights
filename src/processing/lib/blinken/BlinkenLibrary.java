@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import processing.core.PApplet;
@@ -46,7 +45,7 @@ import processing.lib.blinken.jaxb.Header;
  */
 public class BlinkenLibrary extends PImage implements Runnable {
 	
-	static Logger log = Logger.getLogger(BlinkenLibrary.class.getName());
+	private static Logger log = Logger.getLogger(BlinkenLibrary.class.getName());
 
 	// myParent is a reference to the parent sketch
 	private PApplet parent;
@@ -59,7 +58,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	// the current frame number
 	private int currentFrame;
 	// displaing thread
-	Thread runner;
+	private Thread runner;
+	
 	private int defaultDelay = 150;
 	// if the animation is currently playing
 	private boolean play;
@@ -263,15 +263,15 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	private int[] extractDelays() {
 		int n = blm.getFrame().size();
-		int[] delays = new int[n];
+		int[] delaysTmp = new int[n];
 		for (int i = 0; i < n; i++) {
 			int delay = defaultDelay;
 			try {
 				delay = Integer.parseInt(blm.getFrame().get(i).getDuration());				
 			} catch (Exception e) {	}
-			delays[i] = delay; // display duration of frame in milliseconds
+			delaysTmp[i] = delay; // display duration of frame in milliseconds
 		}
-		return delays;
+		return delaysTmp;
 	}
 
 	/**
@@ -280,12 +280,12 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	private PImage[] extractFrames(int color) {
 		int n = blm.getFrame().size();
-		PImage[] frames = new PImage[n];
+		PImage[] framesTmp = new PImage[n];
 
 		for (int i = 0; i < n; i++) {
-			frames[i] = BlinkenHelper.grabFrame(i, blm, color);
+			framesTmp[i] = BlinkenHelper.grabFrame(i, blm, color);
 		}
-		return frames;
+		return framesTmp;
 	}
 
 	/**
