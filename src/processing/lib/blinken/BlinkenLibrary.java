@@ -17,7 +17,7 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author		Michael Vogt
- * @modified	21.10.2010
+ * @modified	16.12.2010
  * @version		v0.5
  */
 
@@ -70,11 +70,13 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	// last time the frame changed
 	private int lastJumpTime;
 
+	private boolean threadRunning = false;
+	
 	private String filename;
 	private int color;
 	
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.42";
+	public final static String VERSION = "v0.5";
 
 
 	/**
@@ -102,16 +104,21 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		this.parent = parent;
 		log.log(Level.INFO, "{0} {1}", new Object[] { NAME, VERSION });
 
-		// fill up the PImage and the delay arrays
-		this.color = r<<16 | g<<8 | b;
-		
 		this.parent.registerDispose(this);	
 		
+		this.loadFile(filename, r, g, b);
+	}
+	
+	/**
+	 * 
+	 * @param filename
+	 * @param r
+	 * @param g
+	 * @param b
+	 */
+	public void loadFile(String filename, int r, int g, int b) {
+		this.color = r<<16 | g<<8 | b;
 		this.loadFile(filename);
-		// and now, make the magic happen
-		this.runner = new Thread(this);
-		this.runner.setName("Blinkenlights BML Animator");
-		this.runner.start(); 		
 	}
 	
 	/**
@@ -119,11 +126,17 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * @param filename
 	 */
 	public void loadFile(String filename) {
-		boolean oldPlay = play;
-		//stop thread
-		play=false;
+		this.threadRunning = false;
 
 		try {
+			//wait until thread is stopped
+			if (this.runner != null) {
+				this.runner.join();				
+			}
+			boolean oldPlay = play;
+			//stop thread
+			play=false;
+
 			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			this.filename = filename;
@@ -136,22 +149,30 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			
 			//load delays
 			this.delays = extractDelays();
-			//reinit applet
+			//init applet
 			super.init(frames[0].width, frames[0].height, RGB);
+			
 			//Select frame 0
 			this.currentFrame=0;
-			this.jump(0);
+			this.jump(currentFrame);
+			this.loop = true;
+			this.play=oldPlay;
+
+			// and now, make the magic happen
+			this.threadRunning = true;
+			this.runner = new Thread(this);
+			this.runner.setName("Blinkenlights BML Animator");
+			this.runner.start(); 		
+
 			log.log(Level.INFO,
 					"Loaded file {0}, contains {1} frames"
 					, new Object[] { filename, frames.length });
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.log(Level.WARNING,
 					"Failed to load {0}, Error: {1}"
 					, new Object[] { filename, e });
 		}
-		this.loop = true;
-		this.play=oldPlay;
-		// re-init our PImage with the new size	
 	}
 
 	/**
@@ -159,6 +180,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 */
 	public void dispose() {
 		stop();
+		this.threadRunning = false;
 		runner = null;
 		play = false;
 		loop = false;
@@ -168,7 +190,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * the thread's run method
 	 */
 	public void run() {
-		while (Thread.currentThread() == runner) {
+		while (Thread.currentThread() == runner && threadRunning) {
 			try {
 				if (ignoreFileDelay) {
 					int delay = (int)(1000.0f/this.parent.frameRate);
@@ -202,10 +224,12 @@ public class BlinkenLibrary extends PImage implements Runnable {
 				}
 			}
 		}
-		log.log(Level.INFO, "Thread {0} stopped", filename);
+		threadRunning = false;
 		frames = null;
 		delays = null;
-		System.gc();
+		blm = null;
+
+		log.log(Level.INFO, "Thread {0} stopped", filename);
 	}
 
 	/**
