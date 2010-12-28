@@ -71,7 +71,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int lastJumpTime;
 
 	private boolean threadRunning = false;
-	
+
 	private String filename;
 	private int color;
 	
@@ -126,15 +126,15 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * @param filename
 	 */
 	public void loadFile(String filename) {
-		this.threadRunning = false;
 		InputStream input = null;
 		
 		try {
 			//wait until thread is stopped
 			if (this.runner != null) {
-				this.runner.join();	
-				this.runner = null;
-			}
+				this.threadRunning = false;
+				this.runner.join();
+			} 
+			
 			boolean oldPlay = play;
 			//stop thread
 			play=false;
@@ -155,15 +155,15 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			
 			//Select frame 0
 			this.currentFrame=0;
-			this.jump(currentFrame);
 			this.loop = true;
 			this.play=oldPlay;
 
 			// and now, make the magic happen
-			this.threadRunning = true;
-			this.runner = new Thread(this);
-			this.runner.setName("Blinkenlights BML Animator");
-			this.runner.start(); 		
+			this.runner = new Thread(this);				
+			this.runner.setName("Blinkenlights BML Animator "+filename);
+			this.runner.start();
+
+			this.jump(currentFrame);
 
 			log.log(Level.INFO,
 					"Loaded file {0}, contains {1} frames"
@@ -193,7 +193,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public void dispose() {
 		stop();
 		this.threadRunning = false;
-		runner = null;
+//		runner = null;
 		play = false;
 		loop = false;
 	}
@@ -202,7 +202,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * the thread's run method
 	 */
 	public void run() {
-		while (Thread.currentThread() == runner && threadRunning) {
+		threadRunning = true;
+		while (threadRunning) {
 			try {
 				if (ignoreFileDelay) {
 					int delay = (int)(1000.0f/this.parent.frameRate);
@@ -236,11 +237,9 @@ public class BlinkenLibrary extends PImage implements Runnable {
 				}
 			}
 		}
-		threadRunning = false;
 		frames = null;
 		delays = null;
 		blm = null;
-
 		log.log(Level.INFO, "Thread {0} stopped", filename);
 	}
 
