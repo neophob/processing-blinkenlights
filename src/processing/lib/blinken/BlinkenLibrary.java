@@ -193,7 +193,6 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public void dispose() {
 		stop();
 		this.threadRunning = false;
-//		runner = null;
 		play = false;
 		loop = false;
 	}
@@ -253,8 +252,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			where = 0;
 		}
 		
-		if (where > frames.length) {
-			//System.out.println("where > frames.length:"+where+" > "+frames.length);
+		if (where+1 >= frames.length) {
 			return;
 		}
 		currentFrame = where;
