@@ -76,7 +76,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int color;
 	
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.51";
+	public final static String VERSION = "v0.52";
 
 
 	/**
@@ -122,7 +122,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	}
 	
 	/**
-	 * load a new file
+	 * load a new bml file
 	 * @param filename
 	 */
 	public void loadFile(String filename) {
