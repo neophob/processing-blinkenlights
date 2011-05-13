@@ -76,7 +76,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int color;
 	
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.52";
+	public final static String VERSION = "v0.6";
 
 
 	/**
@@ -218,9 +218,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 				// if playing, check if we need to go to next frame
 				if (ignoreFileDelay || (parent.millis() - lastJumpTime >= delays[currentFrame])) {
 					// we need to jump
-
 					try {
-						if (currentFrame == frames.length - 1) {
+						if (currentFrame >= frames.length-1) {
 							// its the last frame
 							if (loop) {
 								jump(0); // loop is on, so rewind
@@ -230,7 +229,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 							jump(currentFrame + 1);
 						}					
 
-					} catch (Exception e) {
+					} catch (Exception e) {						
 						//jump can fail if we load a new file!
 					}
 				}
@@ -252,7 +251,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			where = 0;
 		}
 		
-		if (where+1 >= frames.length) {
+		if (where+1 > frames.length) {
+			log.log(Level.WARNING, "Invalid jump frame: {0}", where);
 			return;
 		}
 		currentFrame = where;
