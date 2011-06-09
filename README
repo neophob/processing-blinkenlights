@@ -1,0 +1,41 @@
+=General=
+Library to use blinkenlights movies (*.bml) with [http://www.processing.org Processing].
+
+check http://www.neophob.com/2010/06/processing-blinkenlights-library/ for more information (videos and howtos)
+
+For more information about BML Files check [http://blinkenlights.net/ http://blinkenlights.net/] - long story short, its origin was the german ccc. they use this fileformat to use large buildings as display devices.
+
+=How to install the Processing Library=
+
+This is a standard Processing library - inside the zip file is a readme file, wich explains how to install the library. For your viewing pleasure, here is a copy of it:
+
+{{{
+How to install library blinkenlights 
+
+Contributed libraries must be downloaded separately and placed within 
+the "libraries" folder of your Processing sketchbook. To find the Processing 
+sketchbook location on your computer, open the Preferences window from the 
+Processing application and look for the "Sketchbook location" item at the top. 
+
+Copy the contributed library's folder into the "libraries" folder at this location. 
+You will need to create the "libraries" folder if this is your first contributed library. 
+
+By default the following locations are used for your sketchbook folder.
+For mac users the sketchbook folder is located inside ~/Documents/Processing. 
+for windows users the sketchbook folder is located inside folder 'My Documents'/Processing
+
+The folder structure for library blinkenlights should be as follows
+
+Processing
+  libraries
+    blinkenlights
+      examples
+      library
+        blinkenlights.jar
+      reference
+      src
+                      
+                      
+After library blinkenlights has been successfully installed, restart processing.
+}}}
+
