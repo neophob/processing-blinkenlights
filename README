@@ -1,4 +1,6 @@
-=General=
+General
+=======
+
 Library to use blinkenlights movies (*.bml) with [http://www.processing.org Processing].
 
 check http://www.neophob.com/2010/06/processing-blinkenlights-library/ for more information (videos and howtos)
@@ -9,7 +11,7 @@ For more information about BML Files check [http://blinkenlights.net/ http://bli
 
 This is a standard Processing library - inside the zip file is a readme file, wich explains how to install the library. For your viewing pleasure, here is a copy of it:
 
-{{{
+`
 How to install library blinkenlights 
 
 Contributed libraries must be downloaded separately and placed within 
@@ -37,5 +39,4 @@ Processing
                       
                       
 After library blinkenlights has been successfully installed, restart processing.
-}}}
-
+`
