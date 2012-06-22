@@ -44,7 +44,7 @@ import processing.lib.blinken.jaxb.Header;
  *
  */
 public class BlinkenLibrary extends PImage implements Runnable {
-	
+
 	private static Logger log = Logger.getLogger(BlinkenLibrary.class.getName());
 
 	// myParent is a reference to the parent sketch
@@ -59,7 +59,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int currentFrame;
 	// displaing thread
 	private Thread runner;
-	
+
 	private int defaultDelay = 150;
 	// if the animation is currently playing
 	private boolean play;
@@ -74,11 +74,9 @@ public class BlinkenLibrary extends PImage implements Runnable {
 
 	private String filename;
 	private int color;
-	
-	private int resizeX, resizeY;
-	
+
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.61";
+	public final static String VERSION = "v0.62";
 
 
 	/**
@@ -91,7 +89,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public BlinkenLibrary(PApplet theParent) {
 		this(theParent, 255, 255, 255);
 	}
-	
+
 	/**
 	 * a Constructor, usually called in the setup() method in your sketch to
 	 * initialize and start the library.
@@ -109,31 +107,27 @@ public class BlinkenLibrary extends PImage implements Runnable {
 
 		this.parent.registerDispose(this);	
 	}
+	
 
-	/**
-	 * 
-	 * @param x
-	 * @param y
-	 */
-	public void setImageResize(int x, int y) {
-		this.resizeX = x;
-		this.resizeY = y;
+	public void loadFile(String filename) {
+		this.loadFile(filename, Integer.MAX_VALUE); 
+		//yeah, pretty ugly stuff here...
 	}
 	
 	/**
 	 * load a new bml file
 	 * @param filename
 	 */
-	public void loadFile(String filename) {
+	public void loadFile(String filename, int maximalSize) {
 		InputStream input = null;
-		
+
 		try {
 			//wait until thread is stopped
 			if (this.runner != null) {
 				this.threadRunning = false;
 				this.runner.join();
 			} 
-			
+
 			boolean oldPlay = play;
 			//stop thread
 			play=false;
@@ -143,15 +137,25 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			this.filename = filename;
 			input = this.parent.createInput(filename);
 			blm = (Blm) unmarshaller.unmarshal(input);
-			
+
 			//load images
-			this.frames = extractFrames(color);
+			int wi = Integer.parseInt(blm.getWidth());
+			int he = Integer.parseInt(blm.getHeight());
 			
+			//if the image is larger than maximalSize, reduce size
+			if (wi > maximalSize || he > maximalSize) {
+				//we need to shrink the image!
+				log.log(Level.INFO, "Shrink image to {0} pixels, raw size: {1} {2}", new Object[] { maximalSize, wi, he });
+				this.frames = extractFrames(color, maximalSize);
+			} else {
+				this.frames = extractFrames(color, 0);				
+			}
+
 			//load delays
 			this.delays = extractDelays();
 			//init applet
 			super.init(frames[0].width, frames[0].height, RGB);
-			
+
 			//Select frame 0
 			this.currentFrame=0;
 			this.loop = true;
@@ -165,7 +169,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			this.jump(currentFrame);
 
 			log.log(Level.INFO, "Loaded file {0}, contains {1} frames", new Object[] { filename, frames.length });
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.log(Level.WARNING, "Failed to load {0}, Error: {1}", new Object[] { filename, e });
@@ -244,13 +248,13 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		if (where < 0) {
 			where = 0;
 		}
-		
+
 		if (where+1 > frames.length) {
 			log.log(Level.WARNING, "Invalid jump frame: {0}", where);
 			return;
 		}
 		currentFrame = where;
-		
+
 		// update the pixel-array			
 		loadPixels();
 		System.arraycopy(frames[currentFrame].pixels, 0, pixels, 0, width*height);
@@ -281,21 +285,17 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * creates a PImage-array of gif frames in a GifDecoder object 
 	 * @return 
 	 */
-	private PImage[] extractFrames(int color) {
+	private PImage[] extractFrames(int color, int maximalSize) {
 		int n = blm.getFrame().size();
 		PImage[] framesTmp = new PImage[n];
 
-		if (resizeX>0 && resizeY>0) {
-			for (int i = 0; i < n; i++) {
-				PImage pi = BlinkenHelper.grabFrame(i, blm, color);
-				pi.resize(resizeX, resizeY);
-				framesTmp[i] = pi;
-			}						
-		} else {
-			for (int i = 0; i < n; i++) {
-				framesTmp[i] = BlinkenHelper.grabFrame(i, blm, color);
-			}			
-		}
+		for (int i = 0; i < n; i++) {
+			PImage pi = BlinkenHelper.grabFrame(i, blm, color);
+			if (maximalSize>0) {
+				pi.resize(maximalSize, maximalSize);
+			}
+			framesTmp[i] = pi;
+		}						
 		return framesTmp;
 	}
 
@@ -305,7 +305,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public void play() {
 		play = true;
 	}
-	
+
 	/**
 	 * Begin playing the animation, with repeat.
 	 */
@@ -313,21 +313,21 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		play = true;
 		loop = true;
 	}
-	
+
 	/**
 	 * Shut off the repeating loop (enabled by default).
 	 */
 	public void noLoop() {
 		loop = false;
 	}
-	
+
 	/**
 	 * Pause the animation at its current frame.
 	 */
 	public void pause() {
 		play = false;
 	}
-	
+
 	/**
 	 * Stop the animation, and rewind.
 	 */
@@ -335,7 +335,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		play = false;
 		currentFrame = 0;
 	}
-	
+
 	/**
 	 * total frame numbers of current movie
 	 * @return how many frames this movie contains
@@ -359,7 +359,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public Blm getRawObject() {
 		return blm;
 	}
-	
+
 	/**
 	 * return current frame
 	 * @return current frame nr
@@ -367,7 +367,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public int getCurrentFrame() {
 		return currentFrame;
 	}
-	
+
 	/**
 	 * is the internal (frame) delay used or an external?
 	 * @return true if processing framerate is used, else
@@ -376,7 +376,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	public boolean isIgnoreFileDelay() {
 		return ignoreFileDelay;
 	}
-	
+
 	/**
 	 * ignore the source file delay time
 	 * @param ignoreFileDelay
