@@ -75,8 +75,10 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private String filename;
 	private int color;
 	
+	private int resizeX, resizeY;
+	
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.6";
+	public final static String VERSION = "v0.61";
 
 
 	/**
@@ -86,8 +88,8 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * @param filename - the .blm file to load
 	 * @throws JAXBException
 	 */
-	public BlinkenLibrary(PApplet theParent, String filename) {
-		this(theParent, filename, 255, 255, 255);
+	public BlinkenLibrary(PApplet theParent) {
+		this(theParent, 255, 255, 255);
 	}
 	
 	/**
@@ -99,26 +101,23 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	 * @param g colorize the movie
 	 * @param b colorize the movie
 	 */
-	public BlinkenLibrary(PApplet parent, String filename, int r, int g, int b) {
-		super(1, 1, RGB); 		
+	public BlinkenLibrary(PApplet parent, int r, int g, int b) {
+		super(1, 1, RGB);
+		this.color = r<<16 | g<<8 | b;
 		this.parent = parent;
 		log.log(Level.INFO, "{0} {1}", new Object[] { NAME, VERSION });
 
 		this.parent.registerDispose(this);	
-		
-		this.loadFile(filename, r, g, b);
 	}
-	
+
 	/**
 	 * 
-	 * @param filename
-	 * @param r
-	 * @param g
-	 * @param b
+	 * @param x
+	 * @param y
 	 */
-	public void loadFile(String filename, int r, int g, int b) {
-		this.color = r<<16 | g<<8 | b;
-		this.loadFile(filename);
+	public void setImageResize(int x, int y) {
+		this.resizeX = x;
+		this.resizeY = y;
 	}
 	
 	/**
@@ -165,14 +164,11 @@ public class BlinkenLibrary extends PImage implements Runnable {
 
 			this.jump(currentFrame);
 
-			log.log(Level.INFO,
-					"Loaded file {0}, contains {1} frames"
-					, new Object[] { filename, frames.length });
+			log.log(Level.INFO, "Loaded file {0}, contains {1} frames", new Object[] { filename, frames.length });
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.log(Level.WARNING,
-					"Failed to load {0}, Error: {1}"
-					, new Object[] { filename, e });
+			log.log(Level.WARNING, "Failed to load {0}, Error: {1}", new Object[] { filename, e });
 		} finally {
 			try {
 				if (input!=null) {
@@ -180,9 +176,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 					input = null;
 				}
 			} catch (Exception e) {
-				log.log(Level.WARNING,
-						"Failed to close file {0}, Error: {1}"
-						, new Object[] { filename, e });
+				log.log(Level.WARNING, "Failed to close file {0}, Error: {1}" , new Object[] { filename, e });
 			}
 		}
 	}
@@ -291,8 +285,16 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		int n = blm.getFrame().size();
 		PImage[] framesTmp = new PImage[n];
 
-		for (int i = 0; i < n; i++) {
-			framesTmp[i] = BlinkenHelper.grabFrame(i, blm, color);
+		if (resizeX>0 && resizeY>0) {
+			for (int i = 0; i < n; i++) {
+				PImage pi = BlinkenHelper.grabFrame(i, blm, color);
+				pi.resize(resizeX, resizeY);
+				framesTmp[i] = pi;
+			}						
+		} else {
+			for (int i = 0; i < n; i++) {
+				framesTmp[i] = BlinkenHelper.grabFrame(i, blm, color);
+			}			
 		}
 		return framesTmp;
 	}
