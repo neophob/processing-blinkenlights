@@ -125,7 +125,12 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			//wait until thread is stopped
 			if (this.runner != null) {
 				this.threadRunning = false;
-				this.runner.join();
+				
+				try {
+					this.runner.join(200);
+				} catch (InterruptedException e) {
+					//ignored
+				}
 			} 
 
 			boolean oldPlay = play;
