@@ -76,7 +76,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int color;
 
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.62";
+	public final static String VERSION = "v0.63";
 
 
 	/**
