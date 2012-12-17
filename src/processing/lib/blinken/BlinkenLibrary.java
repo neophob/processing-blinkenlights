@@ -76,7 +76,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 	private int color;
 
 	public final static String NAME = "blinkenlights";
-	public final static String VERSION = "v0.63";
+	public final static String VERSION = "v0.7";
 
 
 	/**
@@ -122,12 +122,32 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		InputStream input = null;
 
 		try {
+		  //make sure input file exist
+			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
+			Unmarshaller unmarshaller = context.createUnmarshaller();			
+			input = this.parent.createInput(filename);
+		  if (input ==null) {
+        //we failed to find file
+        log.log(Level.WARNING, "Failed to load {0}, File not found", new Object[] { filename });
+        return;
+		  }
+
+      this.filename = filename;
+      
+      //signal to stop
+			this.threadRunning = false;
+
+      blm = (Blm) unmarshaller.unmarshal(input);
+
+      //load images
+      int wi = Integer.parseInt(blm.getWidth());
+      int he = Integer.parseInt(blm.getHeight());
+
+		  
 			//wait until thread is stopped
-			if (this.runner != null) {
-				this.threadRunning = false;
-				
-				try {
-					this.runner.join(200);
+			if (this.runner != null) {				
+				try {				
+					this.runner.join(100);
 				} catch (InterruptedException e) {
 					//ignored
 				}
@@ -136,16 +156,6 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			boolean oldPlay = play;
 			//stop thread
 			play=false;
-
-			JAXBContext context = JAXBContext.newInstance("processing.lib.blinken.jaxb");
-			Unmarshaller unmarshaller = context.createUnmarshaller();
-			this.filename = filename;
-			input = this.parent.createInput(filename);
-			blm = (Blm) unmarshaller.unmarshal(input);
-
-			//load images
-			int wi = Integer.parseInt(blm.getWidth());
-			int he = Integer.parseInt(blm.getHeight());
 			
 			//if the image is larger than maximalSize, reduce size
 			if (wi > maximalSize || he > maximalSize) {
@@ -176,7 +186,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 			log.log(Level.INFO, "Loaded file {0}, contains {1} frames", new Object[] { filename, frames.length });
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			log.log(Level.WARNING, "Failed to load {0}, Error: {1}", new Object[] { filename, e });
 		} finally {
 			try {
@@ -240,7 +250,7 @@ public class BlinkenLibrary extends PImage implements Runnable {
 		}
 		frames = null;
 		delays = null;
-		blm = null;
+		//blm = null;
 		log.log(Level.INFO, "Thread {0} stopped", filename);
 	}
 
